@@ -1,9 +1,12 @@
-import 'dotenv/config'
+import "dotenv/config";
 import express from "express";
+import { setHeaders } from "./middlewares/setHeaders.js";
 
 const app = express();
 
-app.use("/", (req, res) => {
+app.use("/", setHeaders); 
+
+app.use("/test", (req, res) => {
   res.json({ test: "test" });
 });
 
