@@ -6,10 +6,17 @@ import path from "path";
 
 export const getPosts = async (req, res, next) => {
   try {
-    const posts = await Post.find();
+    const page = req.query.page ?? 1;
+    const pageSize = req.query.pageSize ?? 10;
+    const totalRecords = await Post.find().countDocuments();
+
+    const posts = await Post.find()
+      .skip(pageSize * (page - 1))
+      .limit(pageSize);
 
     res.status(200).json({
       posts,
+      totalCount: totalRecords,
     });
   } catch (error) {
     next(error);
@@ -19,7 +26,7 @@ export const getPosts = async (req, res, next) => {
 export const getPost = async (req, res, next) => {
   try {
     const postId = req.params.postId;
-    const post = await Post.findOne({ _id: postId });
+    const post = await Post.findById(postId);
     if (!post) {
       generateError("Post not found!", 404);
     }
@@ -56,7 +63,7 @@ export const createPost = async (req, res, next) => {
 export const updatePost = async (req, res, next) => {
   try {
     const postId = req.params.postId;
-    const post = await Post.findOne({ _id: postId });
+    const post = await Post.findById(postId);
     const { title, content } = req.body;
     const imageUrl = req.file.path;
 
