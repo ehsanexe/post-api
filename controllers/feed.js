@@ -1,5 +1,8 @@
 import { generateError } from "../middlewares/errorHandler.js";
+import { __dirname } from "../middlewares/multer.js";
 import Post from "../models/post.js";
+import fs from "fs";
+import path from "path";
 
 export const getPosts = async (req, res, next) => {
   try {
@@ -30,11 +33,12 @@ export const getPost = async (req, res, next) => {
 export const createPost = async (req, res, next) => {
   try {
     const { title, content } = req.body;
+    const imageUrl = req.file.path;
 
     const post = new Post({
       title,
       content,
-      imageUrl: "/images/shoe1.png",
+      imageUrl,
       creator: "Bruce",
     });
 
@@ -47,4 +51,53 @@ export const createPost = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const updatePost = async (req, res, next) => {
+  try {
+    const postId = req.params.postId;
+    const post = await Post.findOne({ _id: postId });
+    const { title, content } = req.body;
+    const imageUrl = req.file.path;
+
+    if (!post) {
+      generateError("Post not found!", 404);
+    }
+
+    if (imageUrl !== post.imageUrl) {
+      clearFile(post.imageUrl);
+    }
+
+    post.title = title;
+    post.content = content;
+    post.imageUrl = imageUrl;
+
+    const result = await post.save();
+    res.status(201).json({ message: "Post updated!", post: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deletePost = async (req, res, next) => {
+  try {
+    const { postId } = req.params;
+    const post = await Post.findById(postId);
+    if (!post) {
+      generateError("Post not found!", 404);
+    }
+
+    clearFile(post.imageUrl);
+    const result = await post.deleteOne();
+    res.status(200).json({ message: "Post deleted!", post: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const clearFile = (filePath) => {
+  const delPath = path.join(__dirname, "..", filePath);
+  fs.unlink(delPath, (err) => {
+    if (err) throw err;
+  });
 };
