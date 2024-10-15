@@ -1,20 +1,30 @@
+import { generateError } from "../middlewares/errorHandler.js";
 import Post from "../models/post.js";
 
-export const getPosts = (req, res, next) => {
-  res.status(200).json({
-    posts: [
-      {
-        _id: "1",
-        title: "First Post",
-        content: "This is the first post!",
-        imageUrl: "/images/shoe1.png",
-        creator: {
-          name: "Bruce",
-        },
-        date: new Date(),
-      },
-    ],
-  });
+export const getPosts = async (req, res, next) => {
+  try {
+    const posts = await Post.find();
+
+    res.status(200).json({
+      posts,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPost = async (req, res, next) => {
+  try {
+    const postId = req.params.postId;
+    const post = await Post.findOne({ _id: postId });
+    if (!post) {
+      generateError("Post not found!", 404);
+    }
+
+    res.status(200).json({ post });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const createPost = async (req, res, next) => {

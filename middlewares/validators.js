@@ -1,4 +1,5 @@
 import { body, validationResult } from "express-validator";
+import { generateError } from "./errorHandler.js";
 
 export const creatPostValidator = [
   body("title").trim().isLength({ min: 3, max: 20 }),
@@ -6,9 +7,7 @@ export const creatPostValidator = [
   (req, res, next) => {
     const error = validationResult(req);
     if (!error.isEmpty()) {
-      const err = new Error("Validation failed!");
-      err.statusCode = 422;
-      throw err;
+      generateError("Validation failed!", 422);
     }
     next();
   },
