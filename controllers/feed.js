@@ -3,6 +3,7 @@ import { __dirname } from "../middlewares/multer.js";
 import Post from "../models/post.js";
 import fs from "fs";
 import path from "path";
+import User from "../models/user.js";
 
 export const getPosts = async (req, res, next) => {
   try {
@@ -42,14 +43,19 @@ export const createPost = async (req, res, next) => {
     const { title, content } = req.body;
     const imageUrl = req.file.path;
 
+    const user = await User.findById(req.userId);
+
     const post = new Post({
       title,
       content,
       imageUrl,
-      creator: "Bruce",
+      creator: req.userId,
     });
 
     const result = await post.save();
+    console.log({user})
+    user.posts.push(result);
+    await user.save();
 
     res.status(201).json({
       message: "Post created successfully!",

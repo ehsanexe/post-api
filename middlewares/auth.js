@@ -6,14 +6,13 @@ export const isAuth = (req, res, next) => {
     if (!req.headers.authorization) {
       generateError("Authentication failed!", 401);
     }
-    const token = req.headers.authorization;
-    const decodedToken = jwt.verify(
-      token.split(" ")[1],
-      process.env.JWT_SECRET
-    );
+    const token = req.headers.authorization.split(" ")[1];
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     if (!decodedToken) {
       generateError("Authentication failed!", 401);
     }
+    console.log({ decodedToken });
+    req.userId = decodedToken.id;
     next();
   } catch (error) {
     next(error);

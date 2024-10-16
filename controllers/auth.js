@@ -6,16 +6,20 @@ export const signUp = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const hashPassword = await bcrypt.hash(password, 12);
-    const user = new User({ email, password: hashPassword });
+    const user = new User({ email, password: hashPassword, posts: [] });
     const response = await user.save();
-    const token = jwt.sign({ email, id: res._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { email, id: response._id },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
 
     res.status(201).json({
       message: "New user created!",
       token,
-      user: { _id: response._id, email: response.email },
+      user: { _id: response._id, email: response.email, posts: response.posts },
     });
   } catch (error) {
     next(error);
@@ -36,7 +40,7 @@ export const login = async (req, res, next) => {
     res.status(200).json({
       message: "Login successful!",
       token,
-      user: { _id: req.user._id, email: req.user.email },
+      user: { _id: req.user._id, email: req.user.email, posts: req.user.posts },
     });
   } catch (error) {
     next(error);

@@ -9,10 +9,12 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  post: {
-    type: mongoose.Types.ObjectId,
-    ref: "Post",
-  },
+  posts: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: "Post",
+    },
+  ],
 });
 
 export default mongoose.model("User", userSchema);
