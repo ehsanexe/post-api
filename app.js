@@ -7,6 +7,7 @@ import bodyParser from "body-parser";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import path from "path";
 import { __dirname, upload } from "./middlewares/multer.js";
+import authRouter from "./routes/auth.js";
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(upload.single("image"));
 app.use(bodyParser.json());
 app.use("/", setHeaders); // to allow CORS
 
+app.use(authRouter);
 app.use(feedRouter);
 
 app.use(errorHandler);

@@ -7,8 +7,11 @@ import {
   updatePost,
 } from "../controllers/feed.js";
 import { creatPostValidator } from "../middlewares/validators.js";
+import { isAuth } from "../middlewares/auth.js";
 
 const feedRouter = express.Router();
+
+feedRouter.use(isAuth);
 
 feedRouter.get("/posts", getPosts);
 feedRouter.get("/post/:postId", getPost);
