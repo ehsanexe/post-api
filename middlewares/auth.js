@@ -11,7 +11,6 @@ export const isAuth = (req, res, next) => {
     if (!decodedToken) {
       generateError("Authentication failed!", 401);
     }
-    console.log({ decodedToken });
     req.userId = decodedToken.id;
     next();
   } catch (error) {

@@ -53,7 +53,6 @@ export const createPost = async (req, res, next) => {
     });
 
     const result = await post.save();
-    console.log({user})
     user.posts.push(result);
     await user.save();
 
@@ -77,6 +76,10 @@ export const updatePost = async (req, res, next) => {
       generateError("Post not found!", 404);
     }
 
+    if (req.userId !== post.creator.toString()) {
+      generateError("Not authorized!", 403);
+    }
+
     if (imageUrl !== post.imageUrl) {
       clearFile(post.imageUrl);
     }
@@ -96,11 +99,21 @@ export const deletePost = async (req, res, next) => {
   try {
     const { postId } = req.params;
     const post = await Post.findById(postId);
+
     if (!post) {
       generateError("Post not found!", 404);
     }
 
+    if (req.userId !== post.creator.toString()) {
+      generateError("Not authorized!", 403);
+    }
+
+    const user = await User.findById(req.userId);
+    user.posts.pull(post._id);
+    await user.save();
+
     clearFile(post.imageUrl);
+
     const result = await post.deleteOne();
     res.status(200).json({ message: "Post deleted!", post: result });
   } catch (error) {
