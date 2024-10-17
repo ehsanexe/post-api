@@ -15,7 +15,7 @@ feedRouter.use(isAuth);
 
 feedRouter.get("/posts", getPosts);
 feedRouter.get("/post/:postId", getPost);
-feedRouter.post("/posts", [...creatPostValidator], createPost);
+feedRouter.post("/post", [...creatPostValidator], createPost);
 feedRouter.put("/post/:postId", [...creatPostValidator], updatePost);
 feedRouter.delete("/post/:postId", deletePost);
 

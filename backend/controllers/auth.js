@@ -4,9 +4,9 @@ import bcrypt from "bcrypt";
 
 export const signUp = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, name } = req.body;
     const hashPassword = await bcrypt.hash(password, 12);
-    const user = new User({ email, password: hashPassword, posts: [] });
+    const user = new User({ name, email, password: hashPassword, posts: [] });
     const response = await user.save();
     const token = jwt.sign(
       { email, id: response._id },
