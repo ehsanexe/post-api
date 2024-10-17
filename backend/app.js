@@ -8,14 +8,13 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 import path from "path";
 import { __dirname, upload } from "./middlewares/multer.js";
 import authRouter from "./routes/auth.js";
-import cors from "cors"
 
 const app = express();
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use(upload.single("image"));
 app.use(bodyParser.json());
-app.use(cors()); // to allow CORS
+app.use(setHeaders); // to allow CORS
 
 app.use("/auth", authRouter);
 app.use("/feed", feedRouter);
