@@ -8,6 +8,8 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 import path from "path";
 import { __dirname, upload } from "./middlewares/multer.js";
 import authRouter from "./routes/auth.js";
+import { Server } from "socket.io";
+import websocket from "./websocket/websocket.js";
 
 const app = express();
 
@@ -24,7 +26,11 @@ app.use(errorHandler);
 mongoose
   .connect(process.env.MONGO_DB)
   .then(() => {
-    app.listen(process.env.PORT);
+    const server = app.listen(process.env.PORT);
+    const io = websocket.init(server);
+    io.on("connection", (socket) => {
+      console.log("a user connected");
+    });
     console.log("connected");
   })
   .catch((err) => console.log(err));

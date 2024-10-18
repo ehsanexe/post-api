@@ -4,6 +4,7 @@ import Post from "../models/post.js";
 import fs from "fs";
 import path from "path";
 import User from "../models/user.js";
+import websocket from "../websocket/websocket.js";
 
 export const getPosts = async (req, res, next) => {
   try {
@@ -55,6 +56,8 @@ export const createPost = async (req, res, next) => {
     const result = await post.save();
     user.posts.push(result);
     await user.save();
+
+    websocket.getIo().emit("posts", { action: "create", post: result });
 
     res.status(201).json({
       message: "Post created successfully!",
