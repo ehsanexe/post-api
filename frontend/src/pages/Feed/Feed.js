@@ -22,21 +22,21 @@ class Feed extends Component {
   };
 
   componentDidMount() {
-    fetch('http://localhost:8080/auth/status', {
-      headers: {
-        Authorization: 'Bearer ' + this.props.token
-      }
-    })
-      .then(res => {
-        if (res.status !== 200) {
-          throw new Error('Failed to fetch user status.');
-        }
-        return res.json();
-      })
-      .then(resData => {
-        this.setState({ status: resData.status });
-      })
-      .catch(this.catchError);
+    // fetch('http://localhost:8080/auth/status', {
+    //   headers: {
+    //     Authorization: 'Bearer ' + this.props.token
+    //   }
+    // })
+    //   .then(res => {
+    //     if (res.status !== 200) {
+    //       throw new Error('Failed to fetch user status.');
+    //     }
+    //     return res.json();
+    //   })
+    //   .then(resData => {
+    //     this.setState({ status: resData.status });
+    //   })
+    //   .catch(this.catchError);
 
     this.loadPosts();
   }
@@ -80,29 +80,29 @@ class Feed extends Component {
       .catch(this.catchError);
   };
 
-  statusUpdateHandler = event => {
-    event.preventDefault();
-    fetch('http://localhost:8080/auth/status', {
-      method: 'PATCH',
-      headers: {
-        Authorization: 'Bearer ' + this.props.token,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        status: this.state.status
-      })
-    })
-      .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error("Can't update status!");
-        }
-        return res.json();
-      })
-      .then(resData => {
-        console.log(resData);
-      })
-      .catch(this.catchError);
-  };
+  // statusUpdateHandler = event => {
+  //   event.preventDefault();
+  //   fetch('http://localhost:8080/auth/status', {
+  //     method: 'PATCH',
+  //     headers: {
+  //       Authorization: 'Bearer ' + this.props.token,
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify({
+  //       status: this.state.status
+  //     })
+  //   })
+  //     .then(res => {
+  //       if (res.status !== 200 && res.status !== 201) {
+  //         throw new Error("Can't update status!");
+  //       }
+  //       return res.json();
+  //     })
+  //     .then(resData => {
+  //       console.log(resData);
+  //     })
+  //     .catch(this.catchError);
+  // };
 
   newPostHandler = () => {
     this.setState({ isEditing: true });
@@ -239,7 +239,7 @@ class Feed extends Component {
           onCancelEdit={this.cancelEditHandler}
           onFinishEdit={this.finishEditHandler}
         />
-        <section className="feed__status">
+        {/* <section className="feed__status">
           <form onSubmit={this.statusUpdateHandler}>
             <Input
               type="text"
@@ -252,7 +252,7 @@ class Feed extends Component {
               Update
             </Button>
           </form>
-        </section>
+        </section> */}
         <section className="feed__control">
           <Button mode="raised" design="accent" onClick={this.newPostHandler}>
             New Post
