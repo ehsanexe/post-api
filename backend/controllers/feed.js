@@ -1,5 +1,5 @@
 import { generateError } from "../middlewares/errorHandler.js";
-import { __dirname } from "../middlewares/multer.js";
+import { __dirname } from "../app.js";
 import Post from "../models/post.js";
 import fs from "fs";
 import path from "path";
@@ -13,6 +13,7 @@ export const getPosts = async (req, res, next) => {
     const totalRecords = await Post.find().countDocuments();
 
     const posts = await Post.find()
+      .populate("creator")
       .skip(pageSize * (page - 1))
       .limit(pageSize);
 
@@ -28,7 +29,7 @@ export const getPosts = async (req, res, next) => {
 export const getPost = async (req, res, next) => {
   try {
     const postId = req.params.postId;
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId).populate("creator");
     if (!post) {
       generateError("Post not found!", 404);
     }

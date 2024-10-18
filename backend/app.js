@@ -6,12 +6,15 @@ import feedRouter from "./routes/feed.js";
 import bodyParser from "body-parser";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import path from "path";
-import { __dirname, upload } from "./middlewares/multer.js";
+import { upload } from "./middlewares/multer.js";
 import authRouter from "./routes/auth.js";
-import { Server } from "socket.io";
 import websocket from "./websocket/websocket.js";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+export const __dirname = dirname(__filename);
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use(upload.single("image"));

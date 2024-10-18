@@ -1,6 +1,4 @@
 import multer from "multer";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -19,9 +17,4 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const __filename = fileURLToPath(import.meta.url);
-
-export const __dirname = dirname(__filename);
 export const upload = multer({ storage, fileFilter });
-
-
