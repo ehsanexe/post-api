@@ -14,6 +14,7 @@ export const getPosts = async (req, res, next) => {
 
     const posts = await Post.find()
       .populate("creator")
+      .sort({ createdAt: -1 })
       .skip(pageSize * (page - 1))
       .limit(pageSize);
 
@@ -93,6 +94,9 @@ export const updatePost = async (req, res, next) => {
     post.imageUrl = imageUrl;
 
     const result = await post.save();
+
+    websocket.getIo().emit("posts", { action: "update", post: result });
+
     res.status(201).json({ message: "Post updated!", post: result });
   } catch (error) {
     next(error);
@@ -119,6 +123,9 @@ export const deletePost = async (req, res, next) => {
     clearFile(post.imageUrl);
 
     const result = await post.deleteOne();
+
+    websocket.getIo().emit("posts", { action: "delete", post: result });
+
     res.status(200).json({ message: "Post deleted!", post: result });
   } catch (error) {
     next(error);
@@ -126,7 +133,7 @@ export const deletePost = async (req, res, next) => {
 };
 
 const clearFile = (filePath) => {
-  const delPath = path.join(__dirname, "..", filePath);
+  const delPath = path.join(__dirname, filePath);
   fs.unlink(delPath, (err) => {
     if (err) throw err;
   });
