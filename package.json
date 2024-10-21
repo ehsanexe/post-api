@@ -7,13 +7,15 @@
   "author": "",
   "license": "ISC",
   "workspaces": [
-    "backend",
+    "backend-restapi",
+    "backend-graphql",
     "frontend"
   ],
   "scripts": {
-    "backend": "npm start -w backend",
+    "graphql": "npm start -w backend-graphql",
+    "restapi": "npm start -w backend-restapi",
     "frontend": "npm start -w frontend",
-    "start": "concurrently \"npm run backend\" \"npm run frontend\""
+    "start": "concurrently \"npm run restapi\" \"npm run frontend\""
   },
   "devDependencies": {
     "concurrently": "^9.0.1"
