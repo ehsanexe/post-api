@@ -1,12 +1,14 @@
 import User from "../models/user.js";
 import Post from "../models/post.js";
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
 
 export const root = {
   hello() {
-    return "HEllo"
+    return "HEllo";
   },
   setMessage({ message }) {
-    return message
+    return message;
   },
   async posts() {
     {
@@ -17,9 +19,9 @@ export const root = {
 
         const posts = await Post.find()
           .populate("creator")
-          .sort({ createdAt: -1 })
-          // .skip(pageSize * (page - 1))
-          // .limit(pageSize);
+          .sort({ createdAt: -1 });
+        // .skip(pageSize * (page - 1))
+        // .limit(pageSize);
 
         console.log({ posts });
         return posts;
@@ -28,11 +30,17 @@ export const root = {
       }
     }
   },
-  async createUser({ email, password, name }) {
+  async createUser({ user }) {
     try {
+      const { email, password, name } = user;
       const hashPassword = await bcrypt.hash(password, 12);
-      const user = new User({ name, email, password: hashPassword, posts: [] });
-      const response = await user.save();
+      const newUser = new User({
+        name,
+        email,
+        password: hashPassword,
+        posts: [],
+      });
+      const response = await newUser.save();
       const token = jwt.sign(
         { email, id: response._id },
         process.env.JWT_SECRET,
@@ -49,7 +57,7 @@ export const root = {
         token,
       };
     } catch (error) {
-      next(error);
+      throw error;
     }
   },
 };

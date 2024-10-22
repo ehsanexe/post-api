@@ -10,7 +10,6 @@ const schema = buildSchema(`
       id: ID!
       name: String!
       email: String!
-      password: String!
       posts: [Post]
     }
     type Post {
@@ -23,7 +22,8 @@ const schema = buildSchema(`
     }
 
     type Mutation {
-      setMessage(message: String): String
+      setMessage(message: String): String,
+      createUser(user: createUserInput): User,
     }
     type Query {
       posts: [Post],
