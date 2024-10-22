@@ -1,18 +1,33 @@
-import {
-  graphql,
-  GraphQLSchema,
-  GraphQLObjectType,
-  GraphQLString,
-  buildSchema,
-} from "graphql";
+import { buildSchema } from "graphql";
 
 const schema = buildSchema(`
-    type TestData {
-        text: String!
-        views: Int!
+    input createUserInput {
+      name: String!
+      email: String!
+      password: String!
+    }
+    type User {
+      id: ID!
+      name: String!
+      email: String!
+      password: String!
+      posts: [Post]
+    }
+    type Post {
+      id: ID!
+      title: String!
+      imageUrl: String!
+      content: String!
+      creator: User!
+      createdAt: String!
+    }
+
+    type Mutation {
+      setMessage(message: String): String
     }
     type Query {
-      hello: TestData!
+      posts: [Post],
+      hello: String
     }
   `);
 

@@ -31,11 +31,10 @@ app.get("/", (_req, res) => {
 });
 app.all("/graphql", createHandler({ schema, rootValue: root, graphiql: true }));
 
-app.listen(8080);
-
-// mongoose
-//   .connect(process.env.MONGO_DB)
-//   .then(() => {
-//     app.listen(process.env.PORT);
-//   })
-//   .catch((err) => console.log(err));
+mongoose
+  .connect(process.env.MONGO_DB)
+  .then(() => {
+    app.listen(process.env.PORT);
+    console.log("connected");
+  })
+  .catch((err) => console.log(err));
