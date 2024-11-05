@@ -1,7 +1,8 @@
 import User from "../models/user.js";
 import Post from "../models/post.js";
-import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import validator from "validator";
 
 export const root = {
   hello() {
@@ -33,6 +34,23 @@ export const root = {
   async createUser({ user }) {
     try {
       const { email, password, name } = user;
+
+      const errors = [];
+
+      if (!validator.isEmail(email)) {
+        errors.push("Invalid email!");
+      }
+      if (!validator.isLength(password, { min: 4, max: 20 })) {
+        errors.push("Invalid password length!");
+      }
+
+      if (errors.length > 0) {
+        const error = new Error(errors[0]);
+        error.data = errors;
+        error.code = 422;
+        throw error;
+      }
+
       const hashPassword = await bcrypt.hash(password, 12);
       const newUser = new User({
         name,

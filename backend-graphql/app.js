@@ -16,6 +16,7 @@ import schema from "./graphql/schema.js";
 import { root } from "./graphql/resolvers.js";
 import { createHandler } from "graphql-http/lib/use/express";
 import { ruruHTML } from "ruru/server";
+import { error } from "console";
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -29,7 +30,19 @@ app.get("/", (_req, res) => {
   res.type("html");
   res.end(ruruHTML({ endpoint: "/graphql" }));
 });
-app.all("/graphql", createHandler({ schema, rootValue: root, graphiql: true }));
+app.all(
+  "/graphql",
+  createHandler({
+    schema,
+    rootValue: root,
+    graphiql: true,
+    formatError: (error) => ({
+      message: error.message || "An error occurred.",
+      code: error.originalError.code || 500,
+      data: error.originalError.data,
+    }),
+  })
+);
 
 mongoose
   .connect(process.env.MONGO_DB)
