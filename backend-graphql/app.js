@@ -24,7 +24,7 @@ export const __dirname = dirname(__filename);
 
 // app.use("/images", express.static(path.join(__dirname, "images")));
 // app.use(bodyParser.json());
-// app.use(setHeaders); // to allow CORS
+app.use(setHeaders); // to allow CORS
 
 app.get("/", (_req, res) => {
   res.type("html");
