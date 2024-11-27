@@ -60,28 +60,52 @@ class App extends Component {
   loginHandler = (event, authData) => {
     event.preventDefault();
     this.setState({ authLoading: true });
-    fetch("http://localhost:8080/auth/login", {
+
+    const url = isGraphQL
+      ? "http://localhost:8081/graphql"
+      : "http://localhost:8080/auth/login";
+
+    const body = isGraphQL
+      ? {
+          query: `mutation {
+              login(email: "${authData.email}", password: "${authData.password}") { token  userId }
+            }
+          `,
+        }
+      : {
+          email: authData.email,
+          password: authData.password,
+        };
+
+    fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        email: authData.email,
-        password: authData.password,
-      }),
+      body: JSON.stringify(body),
     })
       .then((res) => {
-        if (res.status === 422) {
-          throw new Error("Validation failed.");
-        }
-        if (res.status !== 200 && res.status !== 201) {
-          console.log("Error!");
-          throw new Error("Could not authenticate you!");
+        if (!isGraphQL) {
+          if (res.status === 422) {
+            throw new Error("Validation failed.");
+          }
+          if (res.status !== 200 && res.status !== 201) {
+            console.log("Error!");
+            throw new Error("Could not authenticate you!");
+          }
         }
         return res.json();
       })
       .then((resData) => {
         console.log(resData);
+
+        if (isGraphQL && resData.errors && resData.errors[0].status === 422) {
+          throw new Error("Validation failed.");
+        }
+        if (isGraphQL && resData.errors?.length) {
+          throw new Error("Could not authenticate you!");
+        }
+
         this.setState({
           isAuth: true,
           token: resData.token,
@@ -162,7 +186,7 @@ class App extends Component {
             "Validation failed. Make sure the email address isn't used yet!"
           );
         }
-        if (isGraphQL && resData.errors) {
+        if (isGraphQL && resData.errors?.length) {
           throw new Error("Creating a user failed!");
         }
         console.log(resData);

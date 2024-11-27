@@ -20,14 +20,17 @@ const schema = buildSchema(`
       creator: User!
       createdAt: String!
     }
+    type loginResponse {
+      token: String!
+      userId: String!
+    }
 
     type Mutation {
-      setMessage(message: String): String,
       createUser(user: createUserInput): User,
+      login(email: String!, password: String!): loginResponse,
     }
     type Query {
       posts: [Post],
-      hello: String
     }
   `);
 

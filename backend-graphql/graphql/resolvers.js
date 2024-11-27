@@ -5,12 +5,6 @@ import jwt from "jsonwebtoken";
 import validator from "validator";
 
 export const root = {
-  hello() {
-    return "HEllo";
-  },
-  setMessage({ message }) {
-    return message;
-  },
   async posts() {
     {
       try {
@@ -73,6 +67,40 @@ export const root = {
         email: response.email,
         posts: response.posts,
         token,
+      };
+    } catch (error) {
+      throw error;
+    }
+  },
+  async login({ email, password }) {
+    try {
+      const user = await User.findOne({ email });
+      const errors = [];
+
+      if (!user) {
+        errors.push("Invalid email!");
+      }
+
+      const isCorrectPassword = await bcrypt.compare(password, user.password);
+
+      if (!isCorrectPassword) {
+        errors.push("Invalid password!");
+      }
+
+      if (errors.length > 0) {
+        const error = new Error(errors[0]);
+        error.data = errors;
+        error.code = 422;
+        throw error;
+      }
+
+      const token = jwt.sign({ email, id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+
+      return {
+        token,
+        userId: user._id,
       };
     } catch (error) {
       throw error;
