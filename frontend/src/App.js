@@ -112,7 +112,7 @@ class App extends Component {
     this.setState({ authLoading: true });
 
     const url = isGraphQL
-      ? "http://localhost:8080/graphql"
+      ? "http://localhost:8081/graphql"
       : "http://localhost:8080/auth/signup";
 
     const body = isGraphQL

@@ -16,8 +16,6 @@ import schema from "./graphql/schema.js";
 import { root } from "./graphql/resolvers.js";
 import { createHandler } from "graphql-http/lib/use/express";
 import { ruruHTML } from "ruru/server";
-import { error } from "console";
-
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 export const __dirname = dirname(__filename);
