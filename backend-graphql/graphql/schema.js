@@ -24,13 +24,17 @@ const schema = buildSchema(`
       token: String!
       userId: String!
     }
+    type postsResponse {
+      posts: [Post]!
+      totalItems: Int!
+    }
 
     type Mutation {
       createUser(user: createUserInput): User,
-      login(email: String!, password: String!): loginResponse,
     }
     type Query {
-      posts: [Post],
+      login(email: String!, password: String!): loginResponse,
+      posts(page: Int, pageSize: Int): postsResponse,
     }
   `);
 

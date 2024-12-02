@@ -9,6 +9,7 @@ import Loader from "../../components/Loader/Loader";
 import ErrorHandler from "../../components/ErrorHandler/ErrorHandler";
 import "./Feed.css";
 import openSocket from "socket.io-client";
+import { isGraphQL } from "../../flags";
 class Feed extends Component {
   state = {
     isEditing: false,
@@ -41,11 +42,11 @@ class Feed extends Component {
     this.loadPosts();
     const socket = openSocket("http://localhost:8080");
     socket.on("posts", (data) => {
-      if (data.action === 'create') {
+      if (data.action === "create") {
         this.addPost(data.post);
-      } else if (data.action === 'update') {
+      } else if (data.action === "update") {
         this.updatePost(data.post);
-      } else if (data.action === 'delete') {
+      } else if (data.action === "delete") {
         this.loadPosts();
       }
     });
@@ -67,15 +68,17 @@ class Feed extends Component {
     });
   };
 
-  updatePost = post => {
-    this.setState(prevState => {
+  updatePost = (post) => {
+    this.setState((prevState) => {
       const updatedPosts = [...prevState.posts];
-      const updatedPostIndex = updatedPosts.findIndex(p => p._id === post._id);
+      const updatedPostIndex = updatedPosts.findIndex(
+        (p) => p._id === post._id
+      );
       if (updatedPostIndex > -1) {
         updatedPosts[updatedPostIndex] = post;
       }
       return {
-        posts: updatedPosts
+        posts: updatedPosts,
       };
     });
   };
@@ -93,18 +96,59 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch("http://localhost:8080/feed/posts?page=" + page, {
+
+    const url = isGraphQL
+      ? "http://localhost:8081/graphql"
+      : "http://localhost:8080/feed/posts?page=" + page;
+
+    console.log({
+      Authorization: "Bearer " + this.props.token,
+    });
+
+    fetch(url, {
       headers: {
         Authorization: "Bearer " + this.props.token,
+        "Content-Type": isGraphQL
+          ? "application/json"
+          : "text/plain;charset=UTF-8",
       },
+      method: isGraphQL ? "POST" : "GET",
+      body: isGraphQL
+        ? JSON.stringify({
+            query: `{
+              posts(page: ${page}, pageSize: 20) {
+                posts {
+                  id
+                  title
+                  imageUrl
+                  content
+                  creator {
+                    name
+                    email
+                  }
+                  createdAt
+                }
+                totalItems
+              }
+            }
+            `,
+          })
+        : undefined,
     })
       .then((res) => {
-        if (res.status !== 200) {
+        if (!isGraphQL && res.status !== 200) {
           throw new Error("Failed to fetch posts.");
         }
         return res.json();
       })
       .then((resData) => {
+        if (isGraphQL && resData.errors?.length) {
+          throw new Error("Failed to fetch posts.");
+        }
+
+        if (isGraphQL) {
+          resData = resData.data.posts;
+        }
         this.setState({
           posts: resData.posts.map((post) => {
             return {

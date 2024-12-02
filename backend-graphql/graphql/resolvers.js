@@ -5,24 +5,28 @@ import jwt from "jsonwebtoken";
 import validator from "validator";
 
 export const root = {
-  async posts() {
-    {
-      try {
-        // const page = req.query.page ?? 1;
-        // const pageSize = req.query.pageSize ?? 10;
-        // const totalRecords = await Post.find().countDocuments();
-
-        const posts = await Post.find()
-          .populate("creator")
-          .sort({ createdAt: -1 });
-        // .skip(pageSize * (page - 1))
-        // .limit(pageSize);
-
-        console.log({ posts });
-        return posts;
-      } catch (error) {
-        next(error);
+  async posts(args, req) {
+    try {
+      if (!req.isAuth) {
+        const error = {};
+        error.data = new Error("Authentication failed!");
+        error.code = 401;
+        throw error;
       }
+
+      const page = args.page ?? 1;
+      const pageSize = args.pageSize ?? 10;
+      const totalRecords = await Post.find().countDocuments();
+
+      const posts = await Post.find()
+        .populate("creator")
+        .sort({ createdAt: -1 })
+        .skip(pageSize * (page - 1))
+        .limit(pageSize);
+
+      return { totalItems: totalRecords, posts };
+    } catch (error) {
+      throw error;
     }
   },
   async createUser({ user }) {
@@ -100,7 +104,7 @@ export const root = {
 
       return {
         token,
-        userId: user._id,
+        userId: user._id.toString(),
       };
     } catch (error) {
       throw error;

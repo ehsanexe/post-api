@@ -67,7 +67,8 @@ class App extends Component {
 
     const body = isGraphQL
       ? {
-          query: `mutation {
+          query: `
+            {
               login(email: "${authData.email}", password: "${authData.password}") { token  userId }
             }
           `,
@@ -104,6 +105,10 @@ class App extends Component {
         }
         if (isGraphQL && resData.errors?.length) {
           throw new Error("Could not authenticate you!");
+        }
+
+        if (isGraphQL) {
+          resData = resData.data.login;
         }
 
         this.setState({
@@ -145,7 +150,7 @@ class App extends Component {
             createUser(user: { 
               name: "${authData.signupForm.name.value}", 
               email: "${authData.signupForm.email.value}", 
-              password: "${authData.signupForm.password.value} "
+              password: "${authData.signupForm.password.value}"
             }) {
               id
               email
