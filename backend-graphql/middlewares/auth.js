@@ -9,15 +9,13 @@ export const isAuth = (req, res, next) => {
     }
     const token = req.headers.authorization.split(" ")[1];
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    console.log({decodedToken})
     if (!decodedToken) {
       isAuth = false;
       return isAuth;
     }
 
-    req.userId = decodedToken.id;
     isAuth = true;
-    return isAuth;
+    return {isAuth, userId: decodedToken.id};
   } catch (error) {
     return false;
   }

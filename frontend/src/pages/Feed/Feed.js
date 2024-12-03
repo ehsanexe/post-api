@@ -125,6 +125,7 @@ class Feed extends Component {
                   creator {
                     name
                     email
+
                   }
                   createdAt
                 }
@@ -214,28 +215,42 @@ class Feed extends Component {
     formData.append("title", postData.title);
     formData.append("content", postData.content);
     formData.append("image", postData.image);
-    let url = "http://localhost:8080/feed/post";
+    let url = isGraphQL
+      ? "http://localhost:8081/graphql"
+      : "http://localhost:8080/feed/post";
     let method = "POST";
     if (this.state.editPost) {
       url = "http://localhost:8080/feed/post/" + this.state.editPost._id;
       method = "PUT";
     }
 
+    const body = {
+      query: `mutation {
+      createPost(title: "${postData.title}", content:"${postData.content}") { id }
+    }`,
+    };
+
     fetch(url, {
       method: method,
-      body: formData,
+      body: isGraphQL ? JSON.stringify(body) : formData,
       headers: {
         Authorization: "Bearer " + this.props.token,
+        "Content-Type": isGraphQL
+          ? "application/json"
+          : "text/plain;charset=UTF-8",
       },
     })
       .then((res) => {
-        if (res.status !== 200 && res.status !== 201) {
+        if (!isGraphQL && res.status !== 200 && res.status !== 201) {
           throw new Error("Creating or editing a post failed!");
         }
         return res.json();
       })
       .then((resData) => {
         console.log(resData);
+        if (isGraphQL && resData.errors && resData.errors.length) {
+          throw new Error("Creating or editing a post failed!");
+        }
         this.setState((prevState) => {
           return {
             isEditing: false,

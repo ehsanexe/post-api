@@ -29,6 +29,38 @@ export const root = {
       throw error;
     }
   },
+  async createPost({ title, content }, req) {
+    try {
+      const imageUrl = "https://placehold.co/600x400";
+
+      const user = await User.findById(req.userId);
+
+      const post = new Post({
+        title,
+        content,
+        imageUrl,
+        creator: req.userId,
+      });
+
+      const result = await post.save();
+      user.posts.push(result);
+      await user.save();
+
+      // websocket.getIo().emit("posts", { action: "create", post: result });
+
+      return {
+        id: post._id.toString(),
+        title: post.title,
+        imageUrl: post.imageUrl,
+        content: post.content,
+        creator: post.creator,
+        createdAt: post.createdAt,
+      };
+    } catch (error) {
+      console.log({error})
+      throw error;
+    }
+  },
   async createUser({ user }) {
     try {
       const { email, password, name } = user;

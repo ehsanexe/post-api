@@ -41,7 +41,8 @@ app.all(
       data: error.originalError.data,
     }),
     context: (req) => {
-      return { isAuth: isAuth(req), ...req };
+      const authData = isAuth(req);
+      return { ...authData, ...req };
     },
   })
 );

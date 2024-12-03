@@ -31,6 +31,7 @@ const schema = buildSchema(`
 
     type Mutation {
       createUser(user: createUserInput): User,
+      createPost(title: String!, content: String!): Post,
     }
     type Query {
       login(email: String!, password: String!): loginResponse,
