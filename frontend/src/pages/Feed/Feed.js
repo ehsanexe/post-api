@@ -101,9 +101,6 @@ class Feed extends Component {
       ? "http://localhost:8081/graphql"
       : "http://localhost:8080/feed/posts?page=" + page;
 
-    console.log({
-      Authorization: "Bearer " + this.props.token,
-    });
 
     fetch(url, {
       headers: {
