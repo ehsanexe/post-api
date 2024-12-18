@@ -29,10 +29,8 @@ export const root = {
       throw error;
     }
   },
-  async createPost({ title, content }, req) {
+  async createPost({ title, content, imageUrl }, req) {
     try {
-      const imageUrl = "https://placehold.co/600x400";
-
       const user = await User.findById(req.userId);
 
       const post = new Post({

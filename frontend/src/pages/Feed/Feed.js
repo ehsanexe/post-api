@@ -101,7 +101,6 @@ class Feed extends Component {
       ? "http://localhost:8081/graphql"
       : "http://localhost:8080/feed/posts?page=" + page;
 
-
     fetch(url, {
       headers: {
         Authorization: "Bearer " + this.props.token,
@@ -113,7 +112,7 @@ class Feed extends Component {
       body: isGraphQL
         ? JSON.stringify({
             query: `{
-              posts(page: ${page}, pageSize: 20) {
+              posts(page: ${page}, pageSize: 5) {
                 posts {
                   id
                   title
@@ -204,7 +203,7 @@ class Feed extends Component {
     this.setState({ isEditing: false, editPost: null });
   };
 
-  finishEditHandler = (postData) => {
+  finishEditHandler = async (postData) => {
     this.setState({
       editLoading: true,
     });
@@ -221,9 +220,21 @@ class Feed extends Component {
       method = "PUT";
     }
 
+    let imageUrl = "";
+
+    if (isGraphQL) {
+      const response = await fetch("http://localhost:8081/saveimage", {
+        method: "PUT",
+        body: formData,
+        headers: { Authorization: "Bearer " + this.props.token}
+      });
+      const data = await response.json();
+      imageUrl = data.imageUrl;
+    }
+
     const body = {
       query: `mutation {
-      createPost(title: "${postData.title}", content:"${postData.content}") { id }
+      createPost(title: "${postData.title}", content:"${postData.content}", imageUrl: "${imageUrl}") { id }
     }`,
     };
 
@@ -354,7 +365,9 @@ class Feed extends Component {
                   key={post._id}
                   id={post._id}
                   author={post.creator.name}
-                  date={new Date(parseInt(post.createdAt)).toLocaleDateString("en-US")}
+                  date={new Date(parseInt(post.createdAt)).toLocaleDateString(
+                    "en-US"
+                  )}
                   title={post.title}
                   image={post.imageUrl}
                   content={post.content}
