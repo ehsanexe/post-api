@@ -44,7 +44,7 @@ app.put("/saveimage", (req, res) => {
 
   if (imageUrl) {
     if (req.body?.oldPath) {
-      clearFile(re1.body?.oldPath);
+      clearFile(req.body?.oldPath);
     }
     return res.status(201).json({ imageUrl: imageUrl.replace("\\", "/"), message: "Image stored" });
   }
