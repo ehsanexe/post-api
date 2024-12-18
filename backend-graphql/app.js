@@ -36,8 +36,6 @@ app.get("/", (_req, res) => {
 app.put("/saveimage", (req, res) => {
   const authData = isAuth(req);
 
-  console.log({authData})
-
   const imageUrl = req.file.path;
 
   if (!authData.isAuth) {
