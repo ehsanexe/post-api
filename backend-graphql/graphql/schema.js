@@ -36,6 +36,7 @@ const schema = buildSchema(`
     type Query {
       login(email: String!, password: String!): loginResponse,
       posts(page: Int, pageSize: Int): postsResponse,
+      post(id: ID!): Post,
     }
   `);
 

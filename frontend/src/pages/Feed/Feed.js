@@ -362,8 +362,8 @@ class Feed extends Component {
             >
               {this.state.posts.map((post) => (
                 <Post
-                  key={post._id}
-                  id={post._id}
+                  key={post.id}
+                  id={post.id}
                   author={post.creator.name}
                   date={new Date(parseInt(post.createdAt)).toLocaleDateString(
                     "en-US"

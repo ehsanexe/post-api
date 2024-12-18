@@ -29,6 +29,29 @@ export const root = {
       throw error;
     }
   },
+  async post({ id }, req) {
+    try {
+      if (!req.isAuth) {
+        const error = {};
+        error.data = new Error("Authentication failed!");
+        error.code = 401;
+        throw error;
+      }
+
+      console.log({id})
+      const post = await Post.findById(id).populate("creator");
+      if (!post) {
+        const error = {};
+        error.data = new Error("Post not found!");
+        error.code = 404;
+        throw error;
+      }
+
+      return post;
+    } catch (error) {
+      throw error;
+    }
+  },
   async createPost({ title, content, imageUrl }, req) {
     try {
       const user = await User.findById(req.userId);
@@ -55,7 +78,7 @@ export const root = {
         createdAt: post.createdAt,
       };
     } catch (error) {
-      console.log({error})
+      console.log({ error });
       throw error;
     }
   },
