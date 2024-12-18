@@ -38,7 +38,6 @@ export const root = {
         throw error;
       }
 
-      console.log({id})
       const post = await Post.findById(id).populate("creator");
       if (!post) {
         const error = {};
