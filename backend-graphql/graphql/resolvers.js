@@ -81,6 +81,41 @@ export const root = {
       throw error;
     }
   },
+  async updatePost({ title, content, imageUrl, postId }, req) {
+    try {
+      const post = await Post.findById(postId);
+      const error = {};
+
+      if (!post) {
+        error.data = new Error("Post not found!");
+        error.code = 404;
+        throw error;
+      }
+
+      if (req.userId !== post.creator.toString()) {
+        error.data = new Error("Not authorized!");
+        error.code = 403;
+        throw error;
+      }
+
+      post.title = title;
+      post.content = content;
+      post.imageUrl = imageUrl;
+
+      const result = await post.save();
+
+      return {
+        id: result._id.toString(),
+        title: result.title,
+        imageUrl: result.imageUrl,
+        content: result.content,
+        creator: result.creator,
+        createdAt: result.createdAt,
+      };
+    } catch (error) {
+      throw error;
+    }
+  },
   async createUser({ user }) {
     try {
       const { email, password, name } = user;

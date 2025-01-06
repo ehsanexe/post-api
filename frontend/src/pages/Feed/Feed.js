@@ -215,7 +215,7 @@ class Feed extends Component {
       ? "http://localhost:8081/graphql"
       : "http://localhost:8080/feed/post";
     let method = "POST";
-    if (this.state.editPost) {
+    if (this.state.editPost && !isGraphQL) {
       url = "http://localhost:8080/feed/post/" + this.state.editPost._id;
       method = "PUT";
     }
@@ -226,17 +226,23 @@ class Feed extends Component {
       const response = await fetch("http://localhost:8081/saveimage", {
         method: "PUT",
         body: formData,
-        headers: { Authorization: "Bearer " + this.props.token}
+        headers: { Authorization: "Bearer " + this.props.token },
       });
       const data = await response.json();
       imageUrl = data.imageUrl;
     }
 
-    const body = {
-      query: `mutation {
+    const body = this.state.editPost
+      ? {
+          query: `mutation {
+        updatePost(title: "${postData.title}", content:"${postData.content}", imageUrl: "${imageUrl}", postId: "${this.state.editPost.id}") { id }
+      }`,
+        }
+      : {
+          query: `mutation {
       createPost(title: "${postData.title}", content:"${postData.content}", imageUrl: "${imageUrl}") { id }
     }`,
-    };
+        };
 
     fetch(url, {
       method: method,
