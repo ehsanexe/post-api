@@ -111,8 +111,8 @@ class Feed extends Component {
       method: isGraphQL ? "POST" : "GET",
       body: isGraphQL
         ? JSON.stringify({
-            query: `{
-              posts(page: ${page}, pageSize: 5) {
+            query: `query loadPosts($page: Int!){
+              posts(page: $page, pageSize: 5) {
                 posts {
                   id
                   title
@@ -129,6 +129,9 @@ class Feed extends Component {
               }
             }
             `,
+            variables: {
+              page: page,
+            },
           })
         : undefined,
     })
@@ -190,7 +193,9 @@ class Feed extends Component {
 
   startEditPostHandler = (postId) => {
     this.setState((prevState) => {
-      const loadedPost = { ...prevState.posts.find((p) => p._id === postId || p.id === postId) };
+      const loadedPost = {
+        ...prevState.posts.find((p) => p._id === postId || p.id === postId),
+      };
 
       return {
         isEditing: true,
@@ -234,14 +239,25 @@ class Feed extends Component {
 
     const body = this.state.editPost
       ? {
-          query: `mutation {
-        updatePost(title: "${postData.title}", content:"${postData.content}", imageUrl: "${imageUrl}", postId: "${this.state.editPost?.id ?? this.state.editPost?._id}") { id }
+          query: `mutation editPost($title: String!, $content: String!, $imageUrl: String!, $postId: String!){
+        updatePost(title: $title, content: $content, imageUrl: $imageUrl, postId: $postId) { id }
       }`,
+          variables: {
+            title: postData.title,
+            content: postData.content,
+            imageUrl: imageUrl,
+            postId: this.state.editPost?.id ?? this.state.editPost?._id,
+          },
         }
       : {
-          query: `mutation {
-      createPost(title: "${postData.title}", content:"${postData.content}", imageUrl: "${imageUrl}") { id }
+          query: `mutation createPost($title: String!, $content: String!, $imageUrl: String!){
+      createPost(title: $title, content: $content, imageUrl: $imageUrl) { id }
     }`,
+          variables: {
+            title: postData.title,
+            content: postData.content,
+            imageUrl: imageUrl,
+          },
         };
 
     fetch(url, {
@@ -295,7 +311,10 @@ class Feed extends Component {
       ? "http://localhost:8081/graphql"
       : "http://localhost:8080/feed/post/" + postId;
 
-    const body = { query: `mutation { deletePost(postId: "${postId}") }` };
+    const body = {
+      query: `mutation deletePost($postId: String!){ deletePost(postId: $postId) }`,
+      variables: { postId },
+    };
 
     fetch(url, {
       method: isGraphQL ? "POST" : "DELETE",
@@ -391,8 +410,14 @@ class Feed extends Component {
                   title={post.title}
                   image={post.imageUrl}
                   content={post.content}
-                  onStartEdit={this.startEditPostHandler.bind(this, post?._id ?? post?.id)}
-                  onDelete={this.deletePostHandler.bind(this, post?._id ?? post?.id)}
+                  onStartEdit={this.startEditPostHandler.bind(
+                    this,
+                    post?._id ?? post?.id
+                  )}
+                  onDelete={this.deletePostHandler.bind(
+                    this,
+                    post?._id ?? post?.id
+                  )}
                 />
               ))}
             </Paginator>

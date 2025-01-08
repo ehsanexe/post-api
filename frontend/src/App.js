@@ -68,10 +68,11 @@ class App extends Component {
     const body = isGraphQL
       ? {
           query: `
-            {
-              login(email: "${authData.email}", password: "${authData.password}") { token  userId }
+            query login($email: String!, $password: String! ){
+              login(email: $email, password: $password) { token  userId }
             }
           `,
+          variables: { email: authData.email, password: authData.password },
         }
       : {
           email: authData.email,
@@ -146,17 +147,22 @@ class App extends Component {
 
     const body = isGraphQL
       ? {
-          query: `mutation {
-            createUser(user: { 
-              name: "${authData.signupForm.name.value}", 
-              email: "${authData.signupForm.email.value}", 
-              password: "${authData.signupForm.password.value}"
+          query: `mutation signup($name: String!, $email: String!, $password: String! ){
+            createUser (user: { 
+              name: $name, 
+              email: $email, 
+              password: $password
             }) {
               id
               email
             }
           }
         `,
+          variables: {
+            name: authData.signupForm.name.value,
+            email: authData.signupForm.email.value,
+            password: authData.signupForm.password.value,
+          },
         }
       : {
           email: authData.signupForm.email.value,

@@ -33,7 +33,8 @@ class SinglePost extends Component {
       method: isGraphQL ? "POST" : "GET",
       body: isGraphQL
         ? JSON.stringify({
-            query: `{post(id: "${postId}") {title creator { name } imageUrl createdAt content}}`,
+            query: `query getPost($id: ID!){post(id: $id) {title creator { name } imageUrl createdAt content}}`,
+            variables: { id: postId },
           })
         : undefined,
     })
