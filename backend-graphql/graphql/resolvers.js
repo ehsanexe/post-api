@@ -3,6 +3,7 @@ import Post from "../models/post.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import validator from "validator";
+import { clearFile } from "../app.js";
 
 export const root = {
   async posts(args, req) {
@@ -53,6 +54,12 @@ export const root = {
   },
   async createPost({ title, content, imageUrl }, req) {
     try {
+      if (!req.isAuth) {
+        const error = {};
+        error.data = new Error("Authentication failed!");
+        error.code = 401;
+        throw error;
+      }
       const user = await User.findById(req.userId);
 
       const post = new Post({
@@ -83,8 +90,13 @@ export const root = {
   },
   async updatePost({ title, content, imageUrl, postId }, req) {
     try {
-      const post = await Post.findById(postId);
       const error = {};
+      if (!req.isAuth) {
+        error.data = new Error("Authentication failed!");
+        error.code = 401;
+        throw error;
+      }
+      const post = await Post.findById(postId);
 
       if (!post) {
         error.data = new Error("Post not found!");
@@ -112,6 +124,40 @@ export const root = {
         creator: result.creator,
         createdAt: result.createdAt,
       };
+    } catch (error) {
+      throw error;
+    }
+  },
+  async deletePost({ postId }, req) {
+    try {
+      const post = await Post.findById(postId);
+
+      if (!post) {
+        const error = new Error();
+        error.data = "Post not found!";
+        error.code = 404;
+        throw error;
+      }
+
+      console.log({ postId, post, userId: req.userId });
+
+      if (req.userId !== post.creator.toString()) {
+        const error = new Error();
+        error.data = "Not authorized!";
+        error.code = 403;
+        throw error;
+      }
+
+      const user = await User.findById(req.userId);
+      user.posts.pull(post._id);
+      await user.save();
+
+      clearFile(post.imageUrl);
+
+      const result = await post.deleteOne();
+      console.log({ result });
+
+      return result?.acknowledged ?? false;
     } catch (error) {
       throw error;
     }

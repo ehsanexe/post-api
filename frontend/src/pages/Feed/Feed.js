@@ -190,7 +190,7 @@ class Feed extends Component {
 
   startEditPostHandler = (postId) => {
     this.setState((prevState) => {
-      const loadedPost = { ...prevState.posts.find((p) => p._id === postId) };
+      const loadedPost = { ...prevState.posts.find((p) => p._id === postId || p.id === postId) };
 
       return {
         isEditing: true,
@@ -235,7 +235,7 @@ class Feed extends Component {
     const body = this.state.editPost
       ? {
           query: `mutation {
-        updatePost(title: "${postData.title}", content:"${postData.content}", imageUrl: "${imageUrl}", postId: "${this.state.editPost.id}") { id }
+        updatePost(title: "${postData.title}", content:"${postData.content}", imageUrl: "${imageUrl}", postId: "${this.state.editPost?.id ?? this.state.editPost?._id}") { id }
       }`,
         }
       : {
@@ -290,19 +290,33 @@ class Feed extends Component {
 
   deletePostHandler = (postId) => {
     this.setState({ postsLoading: true });
-    fetch("http://localhost:8080/feed/post/" + postId, {
-      method: "DELETE",
+
+    const url = isGraphQL
+      ? "http://localhost:8081/graphql"
+      : "http://localhost:8080/feed/post/" + postId;
+
+    const body = { query: `mutation { deletePost(postId: "${postId}") }` };
+
+    fetch(url, {
+      method: isGraphQL ? "POST" : "DELETE",
       headers: {
         Authorization: "Bearer " + this.props.token,
+        "Content-Type": isGraphQL
+          ? "application/json"
+          : "text/plain;charset=UTF-8",
       },
+      body: JSON.stringify(body),
     })
       .then((res) => {
-        if (res.status !== 200 && res.status !== 201) {
+        if (!isGraphQL && res.status !== 200 && res.status !== 201) {
           throw new Error("Deleting a post failed!");
         }
         return res.json();
       })
       .then((resData) => {
+        if (isGraphQL && resData.errors && resData.errors.length) {
+          throw new Error("Deleting a post failed!");
+        }
         console.log(resData);
         this.loadPosts();
       })
@@ -368,8 +382,8 @@ class Feed extends Component {
             >
               {this.state.posts.map((post) => (
                 <Post
-                  key={post.id}
-                  id={post.id}
+                  key={post?._id ?? post?.id}
+                  id={post?._id ?? post?.id}
                   author={post.creator.name}
                   date={new Date(parseInt(post.createdAt)).toLocaleDateString(
                     "en-US"
@@ -377,8 +391,8 @@ class Feed extends Component {
                   title={post.title}
                   image={post.imageUrl}
                   content={post.content}
-                  onStartEdit={this.startEditPostHandler.bind(this, post._id)}
-                  onDelete={this.deletePostHandler.bind(this, post._id)}
+                  onStartEdit={this.startEditPostHandler.bind(this, post?._id ?? post?.id)}
+                  onDelete={this.deletePostHandler.bind(this, post?._id ?? post?.id)}
                 />
               ))}
             </Paginator>

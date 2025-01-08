@@ -18,6 +18,7 @@ import { createHandler } from "graphql-http/lib/use/express";
 import { ruruHTML } from "ruru/server";
 import { isAuth } from "./middlewares/auth.js";
 import { upload } from "./middlewares/multer.js";
+import fs from "fs";
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -46,7 +47,9 @@ app.put("/saveimage", (req, res) => {
     if (req.body?.oldPath) {
       clearFile(req.body?.oldPath);
     }
-    return res.status(201).json({ imageUrl: imageUrl.replace("\\", "/"), message: "Image stored" });
+    return res
+      .status(201)
+      .json({ imageUrl: imageUrl.replace("\\", "/"), message: "Image stored" });
   }
   if (!imageUrl) {
     return res.status(200).json({ imageUrl, message: "No image provided" });
@@ -61,8 +64,8 @@ app.all(
     graphiql: true,
     formatError: (error) => ({
       message: error.message || "An error occurred.",
-      code: error.originalError.code || 500,
-      data: error.originalError.data,
+      code: error.originalError?.code || 500,
+      data: error.originalError?.data,
     }),
     context: (req) => {
       const authData = isAuth(req);
@@ -79,9 +82,11 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-const clearFile = (filePath) => {
+export const clearFile = (filePath) => {
   const delPath = path.join(__dirname, filePath);
-  fs.unlink(delPath, (err) => {
-    if (err) throw err;
-  });
+  if (filePath) {
+    fs.existsSync(filePath) && fs.unlink(delPath, (err) => {
+      if (err) throw err;
+    });
+  }
 };
