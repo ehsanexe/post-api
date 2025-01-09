@@ -1,1 +1,1 @@
-export const isGraphQL = true;
+export const isGraphQL = false;

@@ -260,15 +260,18 @@ class Feed extends Component {
           },
         };
 
+    const headers = isGraphQL
+      ? {
+          Authorization: "Bearer " + this.props.token,
+          "Content-Type": "application/json",
+        }
+      : {
+          Authorization: "Bearer " + this.props.token,
+        };
     fetch(url, {
       method: method,
       body: isGraphQL ? JSON.stringify(body) : formData,
-      headers: {
-        Authorization: "Bearer " + this.props.token,
-        "Content-Type": isGraphQL
-          ? "application/json"
-          : "text/plain;charset=UTF-8",
-      },
+      headers: headers,
     })
       .then((res) => {
         if (!isGraphQL && res.status !== 200 && res.status !== 201) {
@@ -324,7 +327,7 @@ class Feed extends Component {
           ? "application/json"
           : "text/plain;charset=UTF-8",
       },
-      body: JSON.stringify(body),
+      body: isGraphQL ? JSON.stringify(body) : undefined,
     })
       .then((res) => {
         if (!isGraphQL && res.status !== 200 && res.status !== 201) {
